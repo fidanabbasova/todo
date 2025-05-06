@@ -2,24 +2,25 @@ import { useState, useEffect } from "react";
 import { Todo, FilterType } from "../types/tasks";
 
 export const useTodos = () => {
-  const [todos, setTodos] = useState<Todo[]>([]);
-  const [filter, setFilter] = useState<FilterType>("all");
-
-  useEffect(() => {
+  const getSavedTodos = (): Todo[] => {
     const savedTodos = localStorage.getItem("todos");
     if (savedTodos) {
       try {
-        const parsedTodos = JSON.parse(savedTodos).map((todo: Todo) => ({
+        return JSON.parse(savedTodos).map((todo: Todo) => ({
           ...todo,
           createdAt: new Date(todo.createdAt),
           deleted: todo.deleted || false,
         }));
-        setTodos(parsedTodos);
       } catch (e) {
         console.error("Failed to parse todos from localStorage", e);
+        return [];
       }
     }
-  }, []);
+    return [];
+  };
+
+  const [todos, setTodos] = useState<Todo[]>(getSavedTodos());
+  const [filter, setFilter] = useState<FilterType>("all");
 
   useEffect(() => {
     localStorage.setItem("todos", JSON.stringify(todos));
